@@ -1,0 +1,126 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021, Sebastian Sdorra
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+plugins {
+  id 'java'
+  id 'signing'
+  id 'maven-publish'
+  id 'org.cadixdev.licenser' version '0.6.0'
+  id 'io.github.gradle-nexus.publish-plugin' version '1.0.0'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'com.google.auto:auto-common:0.11'
+  implementation 'com.squareup:javapoet:1.13.0'
+  implementation 'com.google.guava:guava:30.1.1-jre'
+  implementation 'de.otto.edison:edison-hal:2.1.0'
+
+  compileOnly 'org.kohsuke.metainf-services:metainf-services:1.7'
+  annotationProcessor 'org.kohsuke.metainf-services:metainf-services:1.7'
+
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+  testImplementation 'org.assertj:assertj-core:3.19.0'
+
+  testAnnotationProcessor sourceSets.main.output
+}
+
+// apply all dependencies from implementation to the classPath of testAnnotationProcessor
+configurations.testAnnotationProcessor.extendsFrom(configurations.implementation)
+
+license {
+  header = project.file('LICENSE')
+  tasks {
+    gradle {
+      files.from('build.gradle', 'settings.gradle', 'gradle.properties')
+    }
+  }
+}
+
+tasks.withType(JavaCompile) {
+  sourceCompatibility = JavaVersion.VERSION_1_8
+  targetCompatibility = JavaVersion.VERSION_1_8
+  options.encoding = 'UTF-8'
+}
+
+test {
+  useJUnitPlatform()
+}
+
+java {
+  withSourcesJar()
+  withJavadocJar()
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from(components.java)
+      pom {
+        name = 'conveyor'
+        description = 'Generates dto from annotations'
+        url = 'https://github.com/sdorra/conveyor'
+        inceptionYear = '2021'
+        licenses {
+          license {
+            name = 'The MIT license'
+            url = 'https://www.opensource.org/licenses/mit-license.php'
+          }
+        }
+        developers {
+          developer {
+            id = 'sdorra'
+            name = 'Sebastian Sdorra'
+            email = 's.sdorra@gmail.com'
+            timezone = 'Europe/Berlin'
+          }
+        }
+        scm {
+          url = 'https://github.com/sdorra/conveyor'
+          connection = 'scm:git:git://github.com/sdorra/conveyor.git'
+          developerConnection = 'scm:git:git://github.com/sdorra/conveyor.git'
+        }
+        issueManagement {
+          system = "github"
+          url = 'https://github.com/sdorra/conveyor/issues'
+        }
+      }
+    }
+  }
+}
+
+signing {
+  useGpgCmd()
+  sign publishing.publications
+}
+
+nexusPublishing {
+  repositories {
+    sonatype()
+  }
+}
