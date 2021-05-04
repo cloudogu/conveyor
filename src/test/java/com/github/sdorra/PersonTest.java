@@ -24,7 +24,6 @@
 
 package com.github.sdorra;
 
-import com.fasterxml.jackson.databind.introspect.Annotated;
 import de.otto.edison.hal.Links;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -75,6 +74,16 @@ class PersonTest {
     Size annotation = annotation("lastName", Size.class);
     assertThat(annotation.min()).isEqualTo(1);
     assertThat(annotation.max()).isEqualTo(42);
+  }
+
+  @Test
+  void shouldUpdateEntity() {
+    Person person = createTrillian();
+    PersonDto dto = PersonDto.from(person);
+    dto.setLastName("M ...");
+    dto.update(person);
+
+    assertThat(person.getLastName()).isEqualTo("M ...");
   }
 
   private <T extends Annotation> T annotation(String field, Class<T> annotation) throws NoSuchFieldException {

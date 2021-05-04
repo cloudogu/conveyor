@@ -56,6 +56,7 @@ class SourceCodeGenerator {
   private static final String FIELD_DTO = "dto";
 
   private static final String METHOD_FROM = "from";
+  private static final String METHOD_UPDATE = "update";
 
   private static final String NULL = "null";
 
@@ -85,9 +86,27 @@ class SourceCodeGenerator {
     }
 
     appendFrom(model, builder);
+    appendUpdate(model, builder);
 
     JavaFile javaFile = JavaFile.builder(model.getPackageName(), builder.build()).build();
     javaFile.writeTo(writer);
+  }
+
+  private void appendUpdate(Model model, TypeSpec.Builder builder) {
+    TypeName entityType = TypeName.get(model.getClassElement().asType());
+
+    MethodSpec.Builder updateMethod = MethodSpec.methodBuilder(METHOD_UPDATE)
+      .addModifiers(Modifier.PUBLIC)
+      .addParameter(entityType, FIELD_ENTITY);
+
+    for (DtoField field : model.getExportedFields()) {
+      field.getSetter().ifPresent(element -> updateMethod.addStatement(
+        "$N.$N(this.$N)",
+        FIELD_ENTITY, element.getSimpleName(), field.getName()
+      ));
+    }
+
+    builder.addMethod(updateMethod.build());
   }
 
   private void appendFrom(Model model, TypeSpec.Builder builder) {
@@ -168,6 +187,7 @@ class SourceCodeGenerator {
     builder.addMethod(
       MethodSpec.methodBuilder(setter.getSimpleName().toString())
         .addModifiers(Modifier.PUBLIC)
+        .addParameter(TypeName.get(field.getType()), field.getName())
         .addStatement("this.$N = $N", field.getName(), field.getName())
         .build()
     );
