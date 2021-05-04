@@ -24,8 +24,6 @@
 
 package com.github.sdorra.internal;
 
-import com.squareup.javapoet.FieldSpec;
-
 import javax.annotation.Nullable;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
@@ -42,6 +40,10 @@ class DtoField {
     this.field = field;
     this.getter = getter;
     this.setter = setter;
+  }
+
+  public VariableElement getField() {
+    return field;
   }
 
   public TypeMirror getType() {

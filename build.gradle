@@ -47,6 +47,8 @@ dependencies {
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
   testImplementation 'org.assertj:assertj-core:3.19.0'
 
+  testImplementation 'jakarta.validation:jakarta.validation-api:3.0.0'
+
   testAnnotationProcessor sourceSets.main.output
 }
 

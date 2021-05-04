@@ -24,7 +24,11 @@
 
 package com.github.sdorra.internal;
 
+import com.github.sdorra.Exported;
+import com.google.auto.common.MoreElements;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -35,12 +39,25 @@ import de.otto.edison.hal.HalRepresentation;
 import de.otto.edison.hal.Links;
 
 import javax.annotation.Nullable;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 
 class SourceCodeGenerator {
+
+  private static final String FIELD_LINKS = "links";
+  private static final String FIELD_EMBEDDED = "embedded";
+
+  private static final String FIELD_ENTITY = "entity";
+  private static final String FIELD_DTO = "dto";
+
+  private static final String METHOD_FROM = "from";
+
+  private static final String NULL = "null";
 
   void generate(Writer writer, Model model) throws IOException {
     TypeSpec.Builder builder = TypeSpec.classBuilder(model.getSimpleClassName())
@@ -48,15 +65,18 @@ class SourceCodeGenerator {
       .addModifiers(Modifier.PUBLIC)
       .addMethod(MethodSpec.constructorBuilder()
         .addModifiers(Modifier.PRIVATE)
-        .addParameter(ParameterSpec.builder(Links.class, "links")
+        .addParameter(ParameterSpec.builder(Links.class, FIELD_LINKS)
           .addAnnotation(Nullable.class)
           .build()
         )
-        .addParameter(ParameterSpec.builder(Embedded.class, "embedded")
+        .addParameter(ParameterSpec.builder(Embedded.class, FIELD_EMBEDDED)
           .addAnnotation(Nullable.class)
           .build()
         )
-        .addStatement("super($N, $N)", "links", "embedded")
+        .addStatement("super($N, $N)", FIELD_LINKS, FIELD_EMBEDDED)
+        .build()
+      )
+      .addMethod(MethodSpec.constructorBuilder()
         .build()
       );
 
@@ -71,63 +91,77 @@ class SourceCodeGenerator {
   }
 
   private void appendFrom(Model model, TypeSpec.Builder builder) {
-    String entity = "entity";
-    String dto = "dto";
-
-
     TypeName entityType = TypeName.get(model.getClassElement().asType());
     ClassName dtoType = ClassName.bestGuess(model.getSimpleClassName());
 
-
-    builder.addMethod(MethodSpec.methodBuilder("from")
+    builder.addMethod(MethodSpec.methodBuilder(METHOD_FROM)
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-      .addParameter(entityType, entity)
+      .addParameter(entityType, FIELD_ENTITY)
       .returns(dtoType)
-      .addStatement("return from($N, $N, $N)", entity, "null", "null")
+      .addStatement("return from($N, $N, $N)", FIELD_ENTITY, NULL, NULL)
       .build()
     );
 
-    builder.addMethod(MethodSpec.methodBuilder("from")
+    builder.addMethod(MethodSpec.methodBuilder(METHOD_FROM)
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-      .addParameter(entityType, entity)
-      .addParameter(ParameterSpec.builder(Links.class, "links")
+      .addParameter(entityType, FIELD_ENTITY)
+      .addParameter(ParameterSpec.builder(Links.class, FIELD_LINKS)
         .addAnnotation(Nullable.class)
         .build()
       )
       .returns(dtoType)
-      .addStatement("return from($N, $N, $N)", entity, "links", "null")
+      .addStatement("return from($N, $N, $N)", FIELD_ENTITY, FIELD_LINKS, NULL)
       .build()
     );
 
-    MethodSpec.Builder method = MethodSpec.methodBuilder("from")
+    MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_FROM)
       .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-      .addParameter(entityType, entity)
-      .addParameter(ParameterSpec.builder(Links.class, "links")
+      .addParameter(entityType, FIELD_ENTITY)
+      .addParameter(ParameterSpec.builder(Links.class, FIELD_LINKS)
         .addAnnotation(Nullable.class)
         .build()
       )
-      .addParameter(ParameterSpec.builder(Embedded.class, "embedded")
+      .addParameter(ParameterSpec.builder(Embedded.class, FIELD_EMBEDDED)
         .addAnnotation(Nullable.class)
         .build()
       )
       .returns(dtoType)
-      .addStatement("$T $N = new $T($N, $N)", dtoType, dto, dtoType, "links", "embedded");
+      .addStatement("$T $N = new $T($N, $N)", dtoType, FIELD_DTO, dtoType, FIELD_LINKS, FIELD_EMBEDDED);
 
     for (DtoField field : model.getExportedFields()) {
-      method.addStatement("$N.$N = $N.$N()", dto, field.getName(), entity, field.getGetter().getSimpleName());
+      method.addStatement("$N.$N = $N.$N()", FIELD_DTO, field.getName(), FIELD_ENTITY, field.getGetter().getSimpleName());
     }
 
-    method.addStatement("return $N", dto);
+    method.addStatement("return $N", FIELD_DTO);
 
     builder.addMethod(method.build());
   }
 
   private void appendField(TypeSpec.Builder builder, DtoField field) {
     TypeName typeName = TypeName.get(field.getType());
-    builder.addField(typeName, field.getName(), Modifier.PRIVATE);
+
+    FieldSpec.Builder fieldSpec = FieldSpec.builder(typeName, field.getName(), Modifier.PRIVATE);
+
+    for (AnnotationMirror mirror : field.getField().getAnnotationMirrors()) {
+      if (!isTypeOf(mirror, Exported.class)) {
+        fieldSpec.addAnnotation(AnnotationSpec.get(mirror));
+      }
+    }
+
+    builder.addField(fieldSpec.build());
 
     appendGetter(builder, field, typeName);
     field.getSetter().ifPresent(element -> appendSetter(builder, field, element));
+  }
+
+  private boolean isTypeOf(AnnotationMirror annotationMirror, Class<? extends Annotation> annotation) {
+    return isTypeOf(annotationMirror.getAnnotationType().asElement(), annotation);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private boolean isTypeOf(Element element, Class<?> type) {
+    TypeElement typeElement = MoreElements.asType(element);
+    return typeElement.getQualifiedName().contentEquals(type.getName());
   }
 
   private void appendSetter(TypeSpec.Builder builder, DtoField field, Element setter) {

@@ -24,12 +24,18 @@
 
 package com.github.sdorra;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 @GenerateDto
 public class Person {
 
+  @NotNull
   @Exported
   private String firstName;
   @Exported
+  @NotNull
+  @Size(min = 1, max = 42)
   private String lastName;
   @Exported(readOnly = true)
   private int age;
