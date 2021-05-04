@@ -57,6 +57,7 @@ class SourceCodeGenerator {
 
   private static final String METHOD_FROM = "from";
   private static final String METHOD_UPDATE = "update";
+  private static final String METHOD_TO_ENTITY = "toEntity";
 
   private static final String NULL = "null";
 
@@ -87,9 +88,27 @@ class SourceCodeGenerator {
 
     appendFrom(model, builder);
     appendUpdate(model, builder);
+    appendToEntity(model, builder);
 
     JavaFile javaFile = JavaFile.builder(model.getPackageName(), builder.build()).build();
     javaFile.writeTo(writer);
+  }
+
+  private void appendToEntity(Model model, TypeSpec.Builder builder) {
+    TypeName entityType = TypeName.get(model.getClassElement().asType());
+
+    MethodSpec.Builder method = MethodSpec.methodBuilder(METHOD_TO_ENTITY)
+      .addModifiers(Modifier.PUBLIC)
+      .returns(entityType)
+      .addStatement(
+        "$T $N = new $T()", entityType, FIELD_ENTITY, entityType
+      ).addStatement(
+        "$N($N)", METHOD_UPDATE, FIELD_ENTITY
+      ).addStatement(
+        "return $N", FIELD_ENTITY
+      );
+
+    builder.addMethod(method.build());
   }
 
   private void appendUpdate(Model model, TypeSpec.Builder builder) {

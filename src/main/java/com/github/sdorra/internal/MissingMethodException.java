@@ -24,8 +24,10 @@
 
 package com.github.sdorra.internal;
 
+import javax.lang.model.element.TypeElement;
+
 public class MissingMethodException extends RuntimeException {
-  public MissingMethodException(String name) {
-    super("could not find method " + name);
+  public MissingMethodException(TypeElement typeElement, String method) {
+    super("could not find method " + method  + " of " + typeElement.getQualifiedName());
   }
 }

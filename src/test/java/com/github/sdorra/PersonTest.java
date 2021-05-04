@@ -86,6 +86,18 @@ class PersonTest {
     assertThat(person.getLastName()).isEqualTo("M ...");
   }
 
+  @Test
+  void shouldCreateEntityFromDto() {
+    Person trillian = createTrillian();
+    Person person = PersonDto.from(trillian).toEntity();
+
+    assertThat(trillian)
+      .usingRecursiveComparison()
+      // age is not writable and note is not exported
+      .ignoringFields("age", "notes")
+      .isEqualTo(person);
+  }
+
   private <T extends Annotation> T annotation(String field, Class<T> annotation) throws NoSuchFieldException {
     return PersonDto.class.getDeclaredField(field).getAnnotation(annotation);
   }

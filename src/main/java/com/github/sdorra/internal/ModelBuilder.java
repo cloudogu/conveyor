@@ -31,6 +31,8 @@ import com.google.common.base.Strings;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ModelBuilder {
@@ -51,16 +54,29 @@ public class ModelBuilder {
   private final Map<String, Element> methods = new HashMap<>();
 
   public ModelBuilder(TypeElement classElement, GenerateDto generateDto) {
-    this.classElement = classElement;
+    this.classElement = checkDefaultConstructor(classElement);
     this.generateDto = generateDto;
     collect();
   }
 
   @SuppressWarnings("UnstableApiUsage")
+  private TypeElement checkDefaultConstructor(TypeElement classElement) {
+    Optional<ExecutableElement> constructor = classElement.getEnclosedElements()
+      .stream()
+      .filter(e -> e.getKind() == ElementKind.CONSTRUCTOR)
+      .map(MoreElements::asExecutable)
+      .filter(e -> e.getParameters().isEmpty())
+      .filter(e -> !e.getModifiers().contains(Modifier.PRIVATE))
+      .findAny();
+    if (!constructor.isPresent()) {
+      throw new MissingDefaultConstructorException(classElement);
+    }
+    return classElement;
+  }
+
   private void collect() {
     collect(classElement);
 
-    TypeElement classElement = MoreElements.asType(this.classElement);
     TypeMirror superClass = classElement.getSuperclass();
 
     while ((superClass != null) && (superClass.getKind() == TypeKind.DECLARED)) {
@@ -121,7 +137,7 @@ public class ModelBuilder {
   private Element findRequiredMethod(String name) {
     Element method = methods.get(name);
     if (method == null) {
-      throw new MissingMethodException(name);
+      throw new MissingMethodException(classElement, name);
     }
     return method;
   }
