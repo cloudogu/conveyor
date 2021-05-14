@@ -37,9 +37,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Set;
 
 @MetaInfServices(Processor.class)
@@ -69,18 +67,15 @@ public class ConveyorProcessor extends AbstractProcessor {
     Model model = modelBuilder.create();
 
     try {
-      write(element, model);
+      write(model);
     } catch (IOException ex) {
       throw new IllegalStateException("failed to create model", ex);
     }
   }
 
-  private void write(Element element, Model model) throws IOException {
+  private void write(Model model) throws IOException {
     Filer filer = processingEnv.getFiler();
-    JavaFileObject jfo = filer.createSourceFile(model.getClassName(), element);
-    SourceCodeGenerator generator = new SourceCodeGenerator();
-    try (Writer writer = jfo.openWriter()) {
-      generator.generate(writer, model);
-    }
+    SourceCodeGenerator generator = new SourceCodeGenerator(filer);
+    generator.generate(model);
   }
 }

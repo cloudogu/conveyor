@@ -28,6 +28,10 @@ import javax.annotation.Nullable;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 class DtoField {
@@ -35,9 +39,11 @@ class DtoField {
   private final VariableElement field;
   private final Element getter;
   private final Element setter;
+  private final List<String> views = new ArrayList<>();
 
-  DtoField(VariableElement field, Element getter, @Nullable Element setter) {
+  DtoField(VariableElement field, String[] views, Element getter, @Nullable Element setter) {
     this.field = field;
+    this.views.addAll(Arrays.asList(views));
     this.getter = getter;
     this.setter = setter;
   }
@@ -60,5 +66,9 @@ class DtoField {
 
   public Optional<Element> getSetter() {
     return Optional.ofNullable(setter);
+  }
+
+  public List<String> getViews() {
+    return Collections.unmodifiableList(views);
   }
 }

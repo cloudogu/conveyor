@@ -25,11 +25,13 @@
 package com.github.sdorra.internal;
 
 import com.github.sdorra.Exclude;
-import com.github.sdorra.Include;
 import com.github.sdorra.GenerateDto;
+import com.github.sdorra.Include;
 import com.github.sdorra.Strategy;
+import com.github.sdorra.View;
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -101,11 +103,11 @@ public class ModelBuilder {
       if (e.getKind() == ElementKind.FIELD) {
         Include includeAnnotation = e.getAnnotation(Include.class);
         if (includeAnnotation != null) {
-          fields.add((VariableElement) e);
+          addField(e);
         } else if (generateDto.strategy() == Strategy.EXCLUDE) {
           Exclude excludeAnnotation = e.getAnnotation(Exclude.class);
           if (excludeAnnotation == null) {
-            fields.add((VariableElement) e);
+            addField(e);
           }
         }
       } else if (e.getKind() == ElementKind.METHOD) {
@@ -114,27 +116,59 @@ public class ModelBuilder {
     }
   }
 
+  private void addField(Element element) {
+    fields.add((VariableElement) element);
+  }
+
   public Model create() {
     List<DtoField> exportedFields = fields.stream()
       .map(this::field)
       .collect(Collectors.toList());
-    return new Model(classElement, exportedFields, className());
+    List<ViewModel> views = createViews(exportedFields);
+    return new Model(classElement, exportedFields, views, className());
+  }
+
+  private List<ViewModel> createViews(List<DtoField> exportedFields) {
+    Map<String, ViewModel> views = new HashMap<>();
+    for (DtoField exportedField : exportedFields) {
+      for (String view : exportedField.getViews()) {
+        ViewModel viewModel = views.computeIfAbsent(view, this::createViewModel);
+        viewModel.addField(exportedField);
+      }
+    }
+    return ImmutableList.copyOf(views.values());
+  }
+
+  private ViewModel createViewModel(String view) {
+    return new ViewModel(createViewClassName(view));
+  }
+
+  private String createViewClassName(String view) {
+    String className = className();
+    String prefix = view.substring(0, 1).toUpperCase() + view.substring(1);
+    return prefix + className;
   }
 
   private DtoField field(VariableElement field) {
     String name = field.getSimpleName().toString();
-    Include annotation = field.getAnnotation(Include.class);
+    Include includeAnnotation = field.getAnnotation(Include.class);
 
     String capName = name.substring(0, 1).toUpperCase() + name.substring(1);
 
     String prefix = isBoolean(field) ? "is" : "get";
     Element getter = findRequiredMethod(prefix + capName);
     Element setter = null;
-    if (annotation == null || !annotation.readOnly()) {
+    if (includeAnnotation == null || !includeAnnotation.readOnly()) {
       setter = findRequiredMethod("set" + capName);
     }
 
-    return new DtoField(field, getter, setter);
+    String[] views = new String[0];
+    View viewAnnotation = field.getAnnotation(View.class);
+    if (viewAnnotation != null) {
+      views = viewAnnotation.value();
+    }
+
+    return new DtoField(field, views, getter, setter);
   }
 
   private boolean isBoolean(VariableElement field) {

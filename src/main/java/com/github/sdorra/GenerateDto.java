@@ -35,6 +35,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface GenerateDto {
   String className() default "";
-
   Strategy strategy() default Strategy.INCLUDE;
 }

@@ -25,6 +25,7 @@
 package com.github.sdorra.internal;
 
 import com.github.sdorra.Include;
+import com.github.sdorra.View;
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -39,10 +40,12 @@ import de.otto.edison.hal.HalRepresentation;
 import de.otto.edison.hal.Links;
 
 import javax.annotation.Nullable;
+import javax.annotation.processing.Filer;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -61,7 +64,13 @@ class SourceCodeGenerator {
 
   private static final String NULL = "null";
 
-  void generate(Writer writer, Model model) throws IOException {
+  private final Filer filer;
+
+  public SourceCodeGenerator(Filer filer) {
+    this.filer = filer;
+  }
+
+  void generate(Model model) throws IOException {
     TypeSpec.Builder builder = TypeSpec.classBuilder(model.getSimpleClassName())
       .superclass(HalRepresentation.class)
       .addModifiers(Modifier.PUBLIC)
@@ -82,6 +91,11 @@ class SourceCodeGenerator {
         .build()
       );
 
+    for (ViewModel view : model.getViews()) {
+      createInterface(model, view);
+      builder.addSuperinterface(ClassName.get(model.getPackageName(), view.getSimpleClassName()));
+    }
+
     for (DtoField exportedField : model.getExportedFields()) {
       appendField(builder, exportedField);
     }
@@ -90,8 +104,34 @@ class SourceCodeGenerator {
     appendUpdate(model, builder);
     appendToEntity(model, builder);
 
-    JavaFile javaFile = JavaFile.builder(model.getPackageName(), builder.build()).build();
-    javaFile.writeTo(writer);
+    write(model, builder.build());
+  }
+
+  private void createInterface(Model model, ViewModel view) throws IOException {
+    TypeSpec.Builder builder = TypeSpec.interfaceBuilder(view.getSimpleClassName())
+      .addModifiers(Modifier.PUBLIC);
+
+    for (DtoField field : view.getFields()) {
+      builder.addMethod(
+        MethodSpec.methodBuilder(field.getGetter().getSimpleName().toString())
+          .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+          .returns(TypeName.get(field.getType()))
+          .build()
+      );
+    }
+
+    write(model, builder.build());
+  }
+
+  private void write(Model model, TypeSpec typeSpec) throws IOException {
+    JavaFile javaFile = JavaFile.builder(model.getPackageName(), typeSpec).build();
+
+    String className = model.getPackageName() + "." + typeSpec.name;
+
+    JavaFileObject jfo = filer.createSourceFile(className, model.getClassElement());
+    try (Writer writer = jfo.openWriter()) {
+      javaFile.writeTo(writer);
+    }
   }
 
   private void appendToEntity(Model model, TypeSpec.Builder builder) {
@@ -181,7 +221,7 @@ class SourceCodeGenerator {
     FieldSpec.Builder fieldSpec = FieldSpec.builder(typeName, field.getName(), Modifier.PRIVATE);
 
     for (AnnotationMirror mirror : field.getField().getAnnotationMirrors()) {
-      if (!isTypeOf(mirror, Include.class)) {
+      if (!isTypeOf(mirror, Include.class) && !isTypeOf(mirror, View.class)) {
         fieldSpec.addAnnotation(AnnotationSpec.get(mirror));
       }
     }

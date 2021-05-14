@@ -22,46 +22,17 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.github.sdorra;
 
-import com.google.auto.common.MoreElements;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import javax.lang.model.element.TypeElement;
-import java.util.Collections;
-import java.util.List;
-
-public class Model {
-
-  private final TypeElement classElement;
-  private final List<DtoField> exportedFields;
-  private final List<ViewModel> views;
-  private final String simpleClassName;
-
-  Model(TypeElement classElement, List<DtoField> exportedFields, List<ViewModel> views, String simpleClassName) {
-    this.classElement = classElement;
-    this.exportedFields = Collections.unmodifiableList(exportedFields);
-    this.views = views;
-    this.simpleClassName = simpleClassName;
-  }
-
-  public TypeElement getClassElement() {
-    return classElement;
-  }
-
-  public List<DtoField> getExportedFields() {
-    return exportedFields;
-  }
-
-  public String getSimpleClassName() {
-    return simpleClassName;
-  }
-
-  @SuppressWarnings("UnstableApiUsage")
-  public String getPackageName() {
-    return MoreElements.asPackage(classElement.getEnclosingElement()).getQualifiedName().toString();
-  }
-
-  public List<ViewModel> getViews() {
-    return views;
-  }
+@Documented
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface View {
+  String[] value();
 }

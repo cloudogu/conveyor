@@ -24,13 +24,25 @@
 
 package com.github.sdorra;
 
-@GenerateDto(className = "AccDto", strategy = Strategy.EXCLUDE)
+import java.time.Instant;
+
+@GenerateDto(
+  className = "AccDto",
+  strategy = Strategy.EXCLUDE
+)
 public class Account {
 
+  @View("create")
   private String username;
+
+  @View({"create", "update"})
   private String mail;
+
   @Exclude
   private String password;
+
+  @Include(readOnly = true)
+  private Instant lastLogin;
 
   Account() {
   }
@@ -63,5 +75,13 @@ public class Account {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public Instant getLastLogin() {
+    return lastLogin;
+  }
+
+  public void setLastLogin(Instant lastLogin) {
+    this.lastLogin = lastLogin;
   }
 }
