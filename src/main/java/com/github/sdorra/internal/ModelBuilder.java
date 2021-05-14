@@ -24,8 +24,10 @@
 
 package com.github.sdorra.internal;
 
-import com.github.sdorra.Exported;
+import com.github.sdorra.Exclude;
+import com.github.sdorra.Include;
 import com.github.sdorra.GenerateDto;
+import com.github.sdorra.Strategy;
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Strings;
 
@@ -97,9 +99,14 @@ public class ModelBuilder {
   private void collect(Element element) {
     for (Element e : element.getEnclosedElements()) {
       if (e.getKind() == ElementKind.FIELD) {
-        Exported annotation = e.getAnnotation(Exported.class);
-        if (annotation != null) {
+        Include includeAnnotation = e.getAnnotation(Include.class);
+        if (includeAnnotation != null) {
           fields.add((VariableElement) e);
+        } else if (generateDto.strategy() == Strategy.EXCLUDE) {
+          Exclude excludeAnnotation = e.getAnnotation(Exclude.class);
+          if (excludeAnnotation == null) {
+            fields.add((VariableElement) e);
+          }
         }
       } else if (e.getKind() == ElementKind.METHOD) {
         methods.put(e.getSimpleName().toString(), e);
@@ -116,14 +123,14 @@ public class ModelBuilder {
 
   private DtoField field(VariableElement field) {
     String name = field.getSimpleName().toString();
-    Exported annotation = field.getAnnotation(Exported.class);
+    Include annotation = field.getAnnotation(Include.class);
 
     String capName = name.substring(0, 1).toUpperCase() + name.substring(1);
 
     String prefix = isBoolean(field) ? "is" : "get";
     Element getter = findRequiredMethod(prefix + capName);
     Element setter = null;
-    if (!annotation.readOnly()) {
+    if (annotation == null || !annotation.readOnly()) {
       setter = findRequiredMethod("set" + capName);
     }
 

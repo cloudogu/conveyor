@@ -24,7 +24,7 @@
 
 package com.github.sdorra.internal;
 
-import com.github.sdorra.Exported;
+import com.github.sdorra.Include;
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -181,7 +181,7 @@ class SourceCodeGenerator {
     FieldSpec.Builder fieldSpec = FieldSpec.builder(typeName, field.getName(), Modifier.PRIVATE);
 
     for (AnnotationMirror mirror : field.getField().getAnnotationMirrors()) {
-      if (!isTypeOf(mirror, Exported.class)) {
+      if (!isTypeOf(mirror, Include.class)) {
         fieldSpec.addAnnotation(AnnotationSpec.get(mirror));
       }
     }

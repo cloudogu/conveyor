@@ -24,17 +24,44 @@
 
 package com.github.sdorra;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+@GenerateDto(className = "AccDto", strategy = Strategy.EXCLUDE)
+public class Account {
 
-@Documented
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
-public @interface GenerateDto {
-  String className() default "";
+  private String username;
+  private String mail;
+  @Exclude
+  private String password;
 
-  Strategy strategy() default Strategy.INCLUDE;
+  Account() {
+  }
+
+  public Account(String username, String mail, String password) {
+    this.username = username;
+    this.mail = mail;
+    this.password = password;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getMail() {
+    return mail;
+  }
+
+  public void setMail(String mail) {
+    this.mail = mail;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
 }

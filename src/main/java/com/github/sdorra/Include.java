@@ -31,10 +31,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Documented
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface GenerateDto {
-  String className() default "";
+public @interface Include {
 
-  Strategy strategy() default Strategy.INCLUDE;
+  boolean readOnly() default false;
+
 }

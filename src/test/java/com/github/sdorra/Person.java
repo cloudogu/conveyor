@@ -31,15 +31,15 @@ import jakarta.validation.constraints.Size;
 public class Person {
 
   @NotNull
-  @Exported
+  @Include
   private String firstName;
-  @Exported
+  @Include
   @NotNull
   @Size(min = 1, max = 42)
   private String lastName;
-  @Exported(readOnly = true)
+  @Include(readOnly = true)
   private int age;
-  @Exported
+  @Include
   private boolean human;
   private String notes;
 

@@ -24,17 +24,17 @@
 
 package com.github.sdorra;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.jupiter.api.Test;
 
-@Documented
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
-public @interface GenerateDto {
-  String className() default "";
+import static org.assertj.core.api.Assertions.assertThat;
 
-  Strategy strategy() default Strategy.INCLUDE;
+class AccountTest {
+
+  @Test
+  void shouldExcludePassword() {
+    Account account = new Account("dent", "arthur.dent@hitchhiker.com", "safe");
+    AccDto dto = AccDto.from(account);
+
+    assertThat(dto).hasOnlyFields("username", "mail");
+  }
 }

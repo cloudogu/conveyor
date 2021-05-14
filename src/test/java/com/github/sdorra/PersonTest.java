@@ -65,7 +65,7 @@ class PersonTest {
 
   @Test
   void shouldNotCopyExportedAnnotation() throws NoSuchFieldException {
-    Exported annotation = annotation("firstName", Exported.class);
+    Include annotation = annotation("firstName", Include.class);
     assertThat(annotation).isNull();
   }
 
