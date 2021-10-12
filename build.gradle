@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+import org.gradle.util.VersionNumber
+
 plugins {
   id 'java'
   id 'signing'
@@ -117,12 +119,66 @@ publishing {
 }
 
 signing {
-  useGpgCmd()
   sign publishing.publications
 }
 
 nexusPublishing {
   repositories {
     sonatype()
+  }
+}
+
+def isEnvAvailable(String key) {
+  String value = System.getenv(key)
+  return value != null && !value.trim().isEmpty()
+}
+
+// release related tasks
+
+task setVersion {
+  doLast {
+    if (!project.hasProperty('newVersion')) {
+      throw new GradleException('usage setVersion -PnewVersion=x.y.z')
+    }
+
+    String version = project.property('newVersion')
+    setNewVersion(version)
+  }
+}
+
+task setVersionToNextSnapshot {
+  doLast {
+    VersionNumber v = VersionNumber.parse(project.version)
+    setNewVersion("${v.major}.${v.minor}.${v.micro + 1}-SNAPSHOT")
+  }
+}
+
+task printVersion {
+  doLast {
+    println project.version
+  }
+}
+
+def setNewVersion(String newVersion) {
+  File propertiesFile = new File(project.rootDir, 'gradle.properties')
+
+  if (project.version == newVersion) {
+    println "project uses already version ${newVersion}"
+    return
+  }
+
+  def lines = propertiesFile.readLines('UTF-8')
+  def newLines = lines.collect{ line ->
+    if (line.trim().startsWith('version')) {
+      return "version = ${newVersion}"
+    }
+    return line
+  }
+
+  println "set version from ${project.version} to ${newVersion}"
+  propertiesFile.withWriter('UTF-8') {writer ->
+    newLines.forEach { line ->
+      writer.writeLine(line)
+    }
   }
 }
