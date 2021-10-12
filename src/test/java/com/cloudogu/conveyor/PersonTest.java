@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor;
 
 import de.otto.edison.hal.Links;
 import jakarta.validation.constraints.NotNull;

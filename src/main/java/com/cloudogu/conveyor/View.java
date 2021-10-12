@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

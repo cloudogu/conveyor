@@ -22,40 +22,16 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor;
 
-import org.junit.jupiter.api.Test;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class AccountTest {
-
-  private final Account account = new Account("dent", "arthur.dent@hitchhiker.com", "safe");
-  private final AccDto dto = AccDto.from(account);
-
-  @Test
-  void shouldExcludePassword() {
-    assertThat(dto).hasOnlyFields("username", "mail", "lastLogin");
-  }
-
-  @Test
-  void shouldImplementViewInterfaces() {
-    assertThat(dto)
-      .isInstanceOf(CreateAccDto.class)
-      .isInstanceOf(UpdateAccDto.class);
-  }
-
-  @Test
-  void shouldHaveCreateInterface() {
-    CreateAccDto createDto = dto;
-    assertThat(createDto.getUsername()).isEqualTo("dent");
-    assertThat(createDto.getMail()).isEqualTo("arthur.dent@hitchhiker.com");
-  }
-
-  @Test
-  void shouldHaveUpdateInterface() {
-    UpdateAccDto updateDto = dto;
-    assertThat(updateDto.getMail()).isEqualTo("arthur.dent@hitchhiker.com");
-  }
-
+@Documented
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Exclude {
 }

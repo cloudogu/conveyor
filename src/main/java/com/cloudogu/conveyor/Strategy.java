@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor;
 
 public enum Strategy {
   INCLUDE, EXCLUDE

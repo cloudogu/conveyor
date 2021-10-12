@@ -22,10 +22,10 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.cloudogu.conveyor.internal;
 
-import com.github.sdorra.Include;
-import com.github.sdorra.View;
+import com.cloudogu.conveyor.View;
+import com.cloudogu.conveyor.Include;
 import com.google.auto.common.MoreElements;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;

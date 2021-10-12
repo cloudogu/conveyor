@@ -26,7 +26,7 @@ plugins {
   id 'java'
   id 'signing'
   id 'maven-publish'
-  id 'org.cadixdev.licenser' version '0.6.0'
+  id 'org.cadixdev.licenser' version '0.6.1'
   id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
@@ -86,7 +86,7 @@ publishing {
       pom {
         name = 'conveyor'
         description = 'Generates dto from annotations'
-        url = 'https://github.com/sdorra/conveyor'
+        url = 'https://github.com/cloudogu/conveyor'
         inceptionYear = '2021'
         licenses {
           license {
@@ -103,13 +103,13 @@ publishing {
           }
         }
         scm {
-          url = 'https://github.com/sdorra/conveyor'
-          connection = 'scm:git:git://github.com/sdorra/conveyor.git'
-          developerConnection = 'scm:git:git://github.com/sdorra/conveyor.git'
+          url = 'https://github.com/cloudogu/conveyor'
+          connection = 'scm:git:git://github.com/cloudogu/conveyor.git'
+          developerConnection = 'scm:git:git://github.com/cloudogu/conveyor.git'
         }
         issueManagement {
           system = "github"
-          url = 'https://github.com/sdorra/conveyor/issues'
+          url = 'https://github.com/sdorra/cloudogu/issues'
         }
       }
     }

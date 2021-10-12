@@ -22,30 +22,12 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.cloudogu.conveyor.internal;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import javax.lang.model.element.TypeElement;
 
-public class ViewModel {
-
-  private final String simpleClassName;
-  private final List<DtoField> fields = new ArrayList<>();
-
-  public ViewModel(String simpleClassName) {
-    this.simpleClassName = simpleClassName;
-  }
-
-  public String getSimpleClassName() {
-    return simpleClassName;
-  }
-
-  void addField(DtoField field) {
-    this.fields.add(field);
-  }
-
-  public List<DtoField> getFields() {
-    return Collections.unmodifiableList(fields);
+public class MissingDefaultConstructorException extends RuntimeException {
+  public MissingDefaultConstructorException(TypeElement typeElement) {
+    super("could not find default constructor of " + typeElement.getQualifiedName());
   }
 }

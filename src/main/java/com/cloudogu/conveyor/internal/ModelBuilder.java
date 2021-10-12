@@ -22,13 +22,13 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.cloudogu.conveyor.internal;
 
-import com.github.sdorra.Exclude;
-import com.github.sdorra.GenerateDto;
-import com.github.sdorra.Include;
-import com.github.sdorra.Strategy;
-import com.github.sdorra.View;
+import com.cloudogu.conveyor.View;
+import com.cloudogu.conveyor.Exclude;
+import com.cloudogu.conveyor.GenerateDto;
+import com.cloudogu.conveyor.Include;
+import com.cloudogu.conveyor.Strategy;
 import com.google.auto.common.MoreElements;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;

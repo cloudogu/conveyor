@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.cloudogu.conveyor.internal;
 
-import com.github.sdorra.GenerateDto;
+import com.cloudogu.conveyor.GenerateDto;
 import com.google.auto.common.MoreElements;
 import org.kohsuke.MetaInfServices;
 
@@ -42,7 +42,7 @@ import java.util.Set;
 
 @MetaInfServices(Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes("com.github.sdorra.GenerateDto")
+@SupportedAnnotationTypes("com.cloudogu.conveyor.GenerateDto")
 public class ConveyorProcessor extends AbstractProcessor {
 
   @Override

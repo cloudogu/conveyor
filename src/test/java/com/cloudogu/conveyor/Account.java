@@ -22,53 +22,66 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra.internal;
+package com.cloudogu.conveyor;
 
-import javax.annotation.Nullable;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
 
-class DtoField {
+@GenerateDto(
+  className = "AccDto",
+  strategy = Strategy.EXCLUDE
+)
+public class Account {
 
-  private final VariableElement field;
-  private final Element getter;
-  private final Element setter;
-  private final List<String> views = new ArrayList<>();
+  @View("create")
+  private String username;
 
-  DtoField(VariableElement field, String[] views, Element getter, @Nullable Element setter) {
-    this.field = field;
-    this.views.addAll(Arrays.asList(views));
-    this.getter = getter;
-    this.setter = setter;
+  @View({"create", "update"})
+  private String mail;
+
+  @Exclude
+  private String password;
+
+  @Include(readOnly = true)
+  private Instant lastLogin;
+
+  Account() {
   }
 
-  public VariableElement getField() {
-    return field;
+  public Account(String username, String mail, String password) {
+    this.username = username;
+    this.mail = mail;
+    this.password = password;
   }
 
-  public TypeMirror getType() {
-    return field.asType();
+  public String getUsername() {
+    return username;
   }
 
-  public String getName() {
-    return field.getSimpleName().toString();
+  public void setUsername(String username) {
+    this.username = username;
   }
 
-  public Element getGetter() {
-    return getter;
+  public String getMail() {
+    return mail;
   }
 
-  public Optional<Element> getSetter() {
-    return Optional.ofNullable(setter);
+  public void setMail(String mail) {
+    this.mail = mail;
   }
 
-  public List<String> getViews() {
-    return Collections.unmodifiableList(views);
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public Instant getLastLogin() {
+    return lastLogin;
+  }
+
+  public void setLastLogin(Instant lastLogin) {
+    this.lastLogin = lastLogin;
   }
 }

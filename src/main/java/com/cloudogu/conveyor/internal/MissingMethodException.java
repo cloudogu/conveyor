@@ -22,17 +22,12 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor.internal;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.lang.model.element.TypeElement;
 
-@Documented
-@Target(ElementType.FIELD)
-@Retention(RetentionPolicy.SOURCE)
-public @interface Include {
-  boolean readOnly() default false;
+public class MissingMethodException extends RuntimeException {
+  public MissingMethodException(TypeElement typeElement, String method) {
+    super("could not find method " + method  + " of " + typeElement.getQualifiedName());
+  }
 }

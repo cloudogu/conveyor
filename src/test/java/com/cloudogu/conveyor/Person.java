@@ -22,66 +22,64 @@
  * SOFTWARE.
  */
 
-package com.github.sdorra;
+package com.cloudogu.conveyor;
 
-import java.time.Instant;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-@GenerateDto(
-  className = "AccDto",
-  strategy = Strategy.EXCLUDE
-)
-public class Account {
+@GenerateDto
+public class Person {
 
-  @View("create")
-  private String username;
-
-  @View({"create", "update"})
-  private String mail;
-
-  @Exclude
-  private String password;
-
+  @NotNull
+  @Include
+  private String firstName;
+  @Include
+  @NotNull
+  @Size(min = 1, max = 42)
+  private String lastName;
   @Include(readOnly = true)
-  private Instant lastLogin;
+  private int age;
+  @Include
+  private boolean human;
+  private String notes;
 
-  Account() {
+  public String getFirstName() {
+    return firstName;
   }
 
-  public Account(String username, String mail, String password) {
-    this.username = username;
-    this.mail = mail;
-    this.password = password;
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
   }
 
-  public String getUsername() {
-    return username;
+  public String getLastName() {
+    return lastName;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
   }
 
-  public String getMail() {
-    return mail;
+  public int getAge() {
+    return age;
   }
 
-  public void setMail(String mail) {
-    this.mail = mail;
+  public void setAge(int age) {
+    this.age = age;
   }
 
-  public String getPassword() {
-    return password;
+  public boolean isHuman() {
+    return human;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void setHuman(boolean human) {
+    this.human = human;
   }
 
-  public Instant getLastLogin() {
-    return lastLogin;
+  public String getNotes() {
+    return notes;
   }
 
-  public void setLastLogin(Instant lastLogin) {
-    this.lastLogin = lastLogin;
+  public void setNotes(String notes) {
+    this.notes = notes;
   }
 }
