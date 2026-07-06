@@ -32,7 +32,7 @@ dependencies {
   implementation 'com.google.auto:auto-common:0.11'
   implementation 'com.squareup:javapoet:1.13.0'
   implementation 'com.google.guava:guava:33.4.8-jre'
-  implementation 'de.otto.edison:edison-hal:2.1.1'
+  implementation 'de.otto.edison:edison-hal:2.2.0'
   implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
   compileOnly 'org.kohsuke.metainf-services:metainf-services:1.7'
